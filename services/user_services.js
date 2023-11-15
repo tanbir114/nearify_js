@@ -18,9 +18,9 @@ class UserService {
         password,
         phone_no,
         location: {
-            type: 'Point',
-            coordinates: [longitude, latitude],
-          },
+          type: "Point",
+          coordinates: [longitude, latitude],
+        },
         tagArray,
       });
       return await createUser.save();
@@ -41,11 +41,18 @@ class UserService {
     return jwt.sign(tokenData, secretKey, { expiresIn: jwt_expire });
   }
   static async updateLocation(userEmail, newLatitude, newLongitude) {
+    console.log(newLatitude, newLongitude);
+    console.log(userEmail);
     userModel
       .findOneAndUpdate(
-        { email: userEmail }, // Find the user by email
-        { latitude: newLatitude, longitude: newLongitude }, // Update the latitude and longitude
-        { new: true } // Return the updated document
+        { email: userEmail },
+        {
+          location: {
+            type: "Point",
+            coordinates: [newLongitude, newLatitude],
+          },
+        },
+        { new: true }
       )
       .then((updatedUser) =>
         console.log("User updated successfully:", updatedUser)
@@ -57,11 +64,7 @@ class UserService {
   }
   static async updateTag(email, tagArray) {
     await userModel
-      .findOneAndUpdate(
-        { email: email }, // Find the user by email
-        { tagArray: tagArray }, // Update the latitude and longitude
-        { new: true } // Return the updated document
-      )
+      .findOneAndUpdate({ email: email }, { tagArray: tagArray }, { new: true })
       .then((updatedUser) => {
         console.log("User updated successfully:", updatedUser);
         return updatedUser;
@@ -72,45 +75,16 @@ class UserService {
       });
   }
   static async findNearbyUsers(latitude, longitude) {
-    // userModel.collection.createIndex({
-    //   "city.location.coordinates": "Point",
-    // });
-//     return await userModel.create({location: [longitude, latitude] }).
-//   then(() => City.findOne().where('location').within(colorado)).
-//   then(doc => assert.equal(doc.name, 'Denver'));
-  
-    // const centerCoordinates = [longitude, latitude];
-    // const maxDistance = 0.014; // Approximately 1 kilometer
-    // await userModel
-    //   .find({
-    //     "city.location.coordinates": {
-    //       $near: {
-    //         $geometry: {
-    //           type: "Point",
-    //           coordinates: centerCoordinates,
-    //         },
-    //         $maxDistance: maxDistance,
-    //       },
-    //     },
-    //   })
-    //   .then((nearbyUsers) => {
-    //     console.log("Nearby users:", nearbyUsers);
-    //     return nearbyUsers;
-    //   })
-    //   .catch((err) => console.error("thik nai", err));
-
-
-    const nearby = await userModel.find(
-        {
-          location:
-            { $near :
-               {
-                 $geometry: { type: "Point",  coordinates: [longitude, latitude] },
-                 $maxDistance: 0
-               }
-            }
-        }
-    )
+    console.log(latitude, longitude);
+    const nearby = await userModel.find({
+      location: {
+        $near: {
+          $geometry: { type: "Point", coordinates: [longitude, latitude] },
+          $maxDistance: 1000,
+        },
+      },
+    });
+    console.log(nearby);
     return nearby;
   }
 }

@@ -46,17 +46,15 @@ exports.login = async (req, res, next) => {
     //   longitude: user.longitude,
     // };
     // const token = await UserService.generateToken(tokenData, "secretKey", "1h");
-    res
-      .status(200)
-      .json({
-        status: true,
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        phone_no: user.phone_no,
-        latitude: user.latitude,
-        longitude: user.longitude,
-      });
+    res.status(200).json({
+      status: true,
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone_no: user.phone_no,
+      latitude: user.latitude,
+      longitude: user.longitude,
+    });
   } catch (err) {
     console.log(err);
   }
@@ -65,6 +63,7 @@ exports.login = async (req, res, next) => {
 exports.locationUpdate = async (req, res, next) => {
   try {
     const { email, latitude, longitude } = req.body;
+    console.log(latitude, longitude);
     const UpdateLocation = await UserService.updateLocation(
       email,
       latitude,
@@ -93,17 +92,16 @@ exports.tagUpdate = async (req, res, next) => {
 };
 
 exports.nearbyUsers = async (req, res) => {
-    try{
-        const{latitude,longitude} = req.body;
-        users = await UserService.findNearbyUsers(latitude,longitude);
-        console.log("aaaaaaaaaa");
-        console.log("Vodar Users: ", users);
-        // res.json("ok",users);
-        res.json({ msg: "hello" });
-    }
-    catch (err) {
-        console.log("ok re",err);
-    }
-}
+  try {
+    const { latitude, longitude } = req.body;
+    users = await UserService.findNearbyUsers(latitude, longitude);
+    console.log("aaaaaaaaaa");
+    console.log("Vodar Users: ", users);
+    // res.json("ok",users);
+    res.json({users});
+  } catch (err) {
+    console.log("ok re", err);
+  }
+};
 
 exports.userupdate = async (req, res, next) => {};

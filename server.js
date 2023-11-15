@@ -6,7 +6,7 @@ app.get('/', (req, res) =>{
     res.send("Hello world!");
 })
 
-const port = 3000;
+const port = 7000;
 mongoose.connect('mongodb+srv://tanbir:tanbir114@cluster0.bb4slcn.mongodb.net/?retryWrites=true&w=majority')
 .then(client => {
     app.listen(port, ()=>{
