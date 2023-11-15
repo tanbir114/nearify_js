@@ -13,7 +13,6 @@ mongoose.connect('mongodb+srv://tanbir:tanbir114@cluster0.bb4slcn.mongodb.net/?r
         console.log(`Server listening on port http://localhost: ${port}`)
     });
     console.log('Connected!');
-
 })
 .catch(err =>{
     console.log('Error connecting');

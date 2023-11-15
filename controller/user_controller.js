@@ -1,52 +1,109 @@
-const UserService = require('../services/user_services');
-const mongoose = require('mongoose');
+const { response } = require("express");
+const UserService = require("../services/user_services");
+const mongoose = require("mongoose");
 
 exports.register = async (req, res, next) => {
-    try {
-        const { name, email, password, phone_no, latitude,longitude } = req.body;
-        const successRes = await UserService.registerUser(name, email, password, phone_no, latitude, longitude);
-        res.json({ status: true, successs: "User successfully registered." });
-    }
-    catch (err) {
-        console.log('User registration unsuccessful.');
-        throw err;
-    }
-}
+  try {
+    console.log(req.body);
+    const { name, email, password, phone_no, latitude, longitude, tagArray } =
+      req.body;
+    const successRes = await UserService.registerUser(
+      name,
+      email,
+      password,
+      phone_no,
+      latitude,
+      longitude,
+      tagArray
+    );
+    res.json({ status: true, successs: "User successfully registered." });
+  } catch (err) {
+    console.log("User registration unsuccessful.");
+    throw err;
+  }
+};
 
 exports.login = async (req, res, next) => {
-    try {
-        const {email, password} = req.body;
-        const user = await UserService.checkuser(email);
-        if (!user) {
-            throw new Error('User not found');
-        }
+  console.log(req.body);
+  try {
+    const { email, password } = req.body;
+    const user = await UserService.checkuser(email);
+    console.log(user);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const isMatch = await user.comparePassword(password);
+    if (isMatch === false) {
+      throw new Error("Invalid password");
+    }
 
-        const isMatch = await user.comparePassword(password);
-        if (isMatch === false) {
-            console.log('aaaaaaaaaaaaa');
-            throw new Error('Invalid password');
-        }
+    // let tokenData = {
+    //   _id: user._id,
+    //   name: user.name,
+    //   email: user.email,
+    //   phone_no: user.phone_no,
+    //   latitude: user.latitude,
+    //   longitude: user.longitude,
+    // };
+    // const token = await UserService.generateToken(tokenData, "secretKey", "1h");
+    res
+      .status(200)
+      .json({
+        status: true,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone_no: user.phone_no,
+        latitude: user.latitude,
+        longitude: user.longitude,
+      });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-        let tokenData = { _id: user._id, name: user.name, email: user.email, phone_no: user.phone_no, latitude: user.latitude, longitude: user.longitude };
+exports.locationUpdate = async (req, res, next) => {
+  try {
+    const { email, latitude, longitude } = req.body;
+    const UpdateLocation = await UserService.updateLocation(
+      email,
+      latitude,
+      longitude
+    );
+    console.log("Updated location successfully");
+    res.json({ msg: "hello" });
+  } catch (err) {
+    console.log(err);
+    ``;
+    console.log("failed to update location");
+  }
+};
 
-        const token = await UserService.generateToken(tokenData, "secretKey", '1h');
+exports.tagUpdate = async (req, res, next) => {
+  try {
+    const { email, tagArray } = req.body;
+    const UpdateTag = await UserService.updateTag(email, tagArray);
+    console.log("Updated location successfully");
+    res.json({ msg: "hello" });
+  } catch (err) {
+    console.log(err);
+    ``;
+    console.log("failed to update location");
+  }
+};
 
-        res.status(200).json({ status: true, token: token });
+exports.nearbyUsers = async (req, res) => {
+    try{
+        const{latitude,longitude} = req.body;
+        users = await UserService.findNearbyUsers(latitude,longitude);
+        console.log("aaaaaaaaaa");
+        console.log("Vodar Users: ", users);
+        // res.json("ok",users);
+        res.json({ msg: "hello" });
     }
     catch (err) {
-        console.log('Login unsuccessful');
-        // throw err;
+        console.log("ok re",err);
     }
 }
 
-exports.locationUpdate = async(req, res, next) => {
-    try{
-        const {email,latitude, longitude} = req.body;
-        const UpdateLocation = await UserService.updateLocation(email, latitude, longitude);
-        console.log('Updated location successfully');
-    }
-    catch (err){
-        console.log(err);``
-        console.log('failed to update location');
-    }
-}
+exports.userupdate = async (req, res, next) => {};
