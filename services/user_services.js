@@ -41,8 +41,6 @@ class UserService {
     return jwt.sign(tokenData, secretKey, { expiresIn: jwt_expire });
   }
   static async updateLocation(userEmail, newLatitude, newLongitude) {
-    console.log(newLatitude, newLongitude);
-    console.log(userEmail);
     userModel
       .findOneAndUpdate(
         { email: userEmail },
@@ -55,7 +53,7 @@ class UserService {
         { new: true }
       )
       .then((updatedUser) =>
-        console.log("User updated successfully:", updatedUser)
+        console.log("User updated successfully")
       )
       .catch((err) => {
         console.error("Error updating user:", err);
@@ -66,7 +64,7 @@ class UserService {
     await userModel
       .findOneAndUpdate({ email: email }, { tagArray: tagArray }, { new: true })
       .then((updatedUser) => {
-        console.log("User updated successfully:", updatedUser);
+        console.log("User updated successfully");
         return updatedUser;
       })
       .catch((err) => {
@@ -74,9 +72,9 @@ class UserService {
         return;
       });
   }
-  static async findNearbyUsers(latitude, longitude) {
-    console.log(latitude, longitude);
+  static async findNearbyUsers(userEmail ,latitude, longitude) {
     const nearby = await userModel.find({
+      email: { $ne: userEmail },
       location: {
         $near: {
           $geometry: { type: "Point", coordinates: [longitude, latitude] },
@@ -84,8 +82,41 @@ class UserService {
         },
       },
     });
-    console.log(nearby);
     return nearby;
+  }
+  static async addMessage(message, sourceId, targetId, type, time){
+    const result = await userModel.updateOne(
+      { _id: sourceId },
+      {
+        $push: {
+          messages: {
+            targetId: targetId,
+            type: type,
+            message: message,
+            time: time,
+          },
+        },
+      }
+    );
+    result = await userModel.updateOne(
+      { _id: targetId },
+      {
+        $push: {
+          messages: {
+            targetId: sourceId,
+            type: "destination",
+            message: message,
+            time: time,
+          },
+        },
+      }
+    );
+    return result;
+  }
+
+  static async findMessagesByTargetId(sourceId, targetId){
+    const user = await userModel.findById(sourceId);
+    return user;
   }
 }
 

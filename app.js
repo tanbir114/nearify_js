@@ -4,6 +4,8 @@ const userRouter = require('./routes/user_route');
 
 const app = express();
 
+app.use(express.json());
+
 app.use(body_parser.json());
 app.use('/',userRouter);
 

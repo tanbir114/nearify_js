@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 
 exports.register = async (req, res, next) => {
   try {
-    console.log(req.body);
     const { name, email, password, phone_no, latitude, longitude, tagArray } =
       req.body;
     const successRes = await UserService.registerUser(
@@ -24,11 +23,11 @@ exports.register = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-  console.log(req.body);
+  // console.log(req.body);
   try {
     const { email, password } = req.body;
     const user = await UserService.checkuser(email);
-    console.log(user);
+    // console.log(user);
     if (!user) {
       throw new Error("User not found");
     }
@@ -63,7 +62,7 @@ exports.login = async (req, res, next) => {
 exports.locationUpdate = async (req, res, next) => {
   try {
     const { email, latitude, longitude } = req.body;
-    console.log(latitude, longitude);
+    // console.log(latitude, longitude);
     const UpdateLocation = await UserService.updateLocation(
       email,
       latitude,
@@ -93,15 +92,45 @@ exports.tagUpdate = async (req, res, next) => {
 
 exports.nearbyUsers = async (req, res) => {
   try {
-    const { latitude, longitude } = req.body;
-    users = await UserService.findNearbyUsers(latitude, longitude);
-    console.log("aaaaaaaaaa");
-    console.log("Vodar Users: ", users);
-    // res.json("ok",users);
+    const { email, latitude, longitude } = req.body;
+    users = await UserService.findNearbyUsers(email, latitude, longitude);
     res.json({users});
   } catch (err) {
-    console.log("ok re", err);
+    console.log(err);
   }
 };
 
-exports.userupdate = async (req, res, next) => {};
+exports.sentMessage = async (req, res) => {
+  const {message , sourceId, targetId, type, time} = req.body;
+  try {
+    msg = await UserService.addMessage(message , sourceId, targetId, type, time);
+    res.status(200).json({ success: true, message: 'Message sent successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+
+exports.oldMessage = async (req, res) => {
+  const {sourceId, targetId} = req.body;
+  try{
+    msg = await UserService.findMessagesByTargetId(sourceId, targetId);
+    res.status(200).json({msg: msg});
+  }
+  catch(error){
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+
+exports.addImage = async (req, res) => {
+  try{
+    res.json({path:req.file.filename});
+  }
+  catch(error){
+    return res.json({error: error});
+  }
+}
+
+exports.userupdate = async (req, res, next) => {}; 
+

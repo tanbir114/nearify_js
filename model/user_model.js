@@ -1,18 +1,37 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 const Schema = mongoose.Schema;
 
 const pointSchema = new mongoose.Schema({
-    type: {
-      type: String,
-      enum: ['Point'],
-      required: true,
-    },
-    coordinates: {
-      type: [Number],
-      required: true,
-    }
-  });
+  type: {
+    type: String,
+    enum: ["Point"],
+    required: true,
+  },
+  coordinates: {
+    type: [Number],
+    required: true,
+  },
+});
+
+const messageSchema = new mongoose.Schema({
+  targetId: {
+    type: String,
+    required: true,
+  },
+  type: {
+    type: String,
+    required: true,
+  },
+  message: {
+    type: String,
+    required: true,
+  },
+  time: {
+    type: String,
+    required: true,
+  },
+});
 
 const userSchema = new Schema({
   name: {
@@ -33,16 +52,17 @@ const userSchema = new Schema({
     type: String,
     required: false,
   },
-location: {
+  location: {
     type: pointSchema,
   },
   tagArray: {
     type: [String],
     default: [],
   },
+  messages: [messageSchema],
 });
 
-userSchema.pre('save', async function () {
+userSchema.pre("save", async function () {
   try {
     var user = this;
     const salt = await bcrypt.genSalt(10);
@@ -63,4 +83,4 @@ userSchema.methods.comparePassword = async function (userPassword) {
   }
 };
 
-module.exports = mongoose.model('user', userSchema);
+module.exports = mongoose.model("user", userSchema);
