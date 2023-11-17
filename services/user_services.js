@@ -84,7 +84,7 @@ class UserService {
     });
     return nearby;
   }
-  static async addMessage(message, sourceId, targetId, type, time){
+  static async addMessage(message, sourceId, targetId, type, time, src_path, dest_path){
     const result = await userModel.updateOne(
       { _id: sourceId },
       {
@@ -94,6 +94,7 @@ class UserService {
             type: type,
             message: message,
             time: time,
+            path: src_path
           },
         },
       }
@@ -107,6 +108,7 @@ class UserService {
             type: "destination",
             message: message,
             time: time,
+            path: dest_path
           },
         },
       }

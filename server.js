@@ -18,6 +18,7 @@ var io = require("socket.io")(server, {
 app.use(express.json());
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("data/uploads"));
 var clients = {};
 
 io.on("connection", (socket) => {

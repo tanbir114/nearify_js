@@ -101,9 +101,9 @@ exports.nearbyUsers = async (req, res) => {
 };
 
 exports.sentMessage = async (req, res) => {
-  const {message , sourceId, targetId, type, time} = req.body;
+  const {message , sourceId, targetId, type, time, src_path, dest_path} = req.body;
   try {
-    msg = await UserService.addMessage(message , sourceId, targetId, type, time);
+    msg = await UserService.addMessage(message , sourceId, targetId, type, time, src_path, dest_path);
     res.status(200).json({ success: true, message: 'Message sent successfully' });
   } catch (error) {
     console.error(error);
@@ -123,7 +123,7 @@ exports.oldMessage = async (req, res) => {
   }
 }
 
-exports.addImage = async (req, res) => {
+exports.addImage = async (req, res) =>{
   try{
     res.json({path:req.file.filename});
   }
