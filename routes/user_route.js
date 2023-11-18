@@ -25,6 +25,8 @@ router.post("/tagUpdate", UserController.tagUpdate);
 router.post("/nearbyUsers", UserController.nearbyUsers);
 router.post("/sentMessage", UserController.sentMessage);
 router.post("/oldMessage", UserController.oldMessage);
+router.post("/sentGroupMessage", UserController.sentGroupMessage);
+router.post("/oldGroupMessage", UserController.oldGroupMessage);
 router.post("/addImage", upload.single("img"),UserController.addImage);
 
 module.exports = router;

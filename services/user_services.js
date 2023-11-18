@@ -1,4 +1,5 @@
 const userModel = require("../model/user_model");
+const groupModel = require("../model/group_model");
 const jwt = require("jsonwebtoken");
 
 class UserService {
@@ -52,9 +53,7 @@ class UserService {
         },
         { new: true }
       )
-      .then((updatedUser) =>
-        console.log("User updated successfully")
-      )
+      .then((updatedUser) => console.log("User updated successfully"))
       .catch((err) => {
         console.error("Error updating user:", err);
         return;
@@ -72,7 +71,7 @@ class UserService {
         return;
       });
   }
-  static async findNearbyUsers(userEmail ,latitude, longitude) {
+  static async findNearbyUsers(userEmail, latitude, longitude) {
     const nearby = await userModel.find({
       email: { $ne: userEmail },
       location: {
@@ -84,7 +83,15 @@ class UserService {
     });
     return nearby;
   }
-  static async addMessage(message, sourceId, targetId, type, time, src_path, dest_path){
+  static async addMessage(
+    message,
+    sourceId,
+    targetId,
+    type,
+    time,
+    src_path,
+    dest_path
+  ) {
     const result = await userModel.updateOne(
       { _id: sourceId },
       {
@@ -94,7 +101,7 @@ class UserService {
             type: type,
             message: message,
             time: time,
-            path: src_path
+            path: src_path,
           },
         },
       }
@@ -108,7 +115,7 @@ class UserService {
             type: "destination",
             message: message,
             time: time,
-            path: dest_path
+            path: dest_path,
           },
         },
       }
@@ -116,8 +123,39 @@ class UserService {
     return result;
   }
 
-  static async findMessagesByTargetId(sourceId, targetId){
-    const user = await userModel.findById(sourceId);
+  static async findMessagesByTargetId(sourceId, targetId) {
+    const user = await userModel.findOne({
+      _id: sourceId,
+      "messages.targetId": targetId,
+    });
+    return user;
+  }
+
+  static async addGroupMessage(message, userId, senderName, time, groupId, src_path, dest_path) {
+    try {
+      const createMessage = new groupModel({
+        userId: userId,
+        message: message,
+        time: time,
+        groupId: groupId,
+        src_path: src_path,
+        dest_path: dest_path,
+        senderName: senderName,
+      });
+      console.log(createMessage);
+      return await createMessage.save();
+    } catch (err) {
+      console.error(err);
+      console.log("Group Message save error");
+      throw err;
+    }
+  }
+
+  static async findGroupMessagesByTargetId(groupId) {
+    const user = await groupModel.find({
+      groupId: groupId,
+    });
+    console.log(user);
     return user;
   }
 }

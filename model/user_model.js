@@ -25,7 +25,6 @@ const messageSchema = new mongoose.Schema({
   },
   message: {
     type: String,
-    required: true,
   },
   time: {
     type: String,
@@ -33,7 +32,6 @@ const messageSchema = new mongoose.Schema({
   },
   path:{
     type: String,
-    required: true,
   }
 });
 
@@ -58,6 +56,7 @@ const userSchema = new Schema({
   },
   location: {
     type: pointSchema,
+    index: "2dsphere",
   },
   tagArray: {
     type: [String],

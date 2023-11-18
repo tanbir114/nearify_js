@@ -111,10 +111,33 @@ exports.sentMessage = async (req, res) => {
   }
 }
 
+exports.sentGroupMessage = async (req, res) => {
+  const {message, userId, senderName, groupId, time,src_path, dest_path} = req.body;
+  try {
+    msg = await UserService.addGroupMessage(message, userId, senderName, time, groupId, src_path, dest_path);
+    res.status(200).json({ success: true, message: 'Message sent successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+
 exports.oldMessage = async (req, res) => {
   const {sourceId, targetId} = req.body;
   try{
     msg = await UserService.findMessagesByTargetId(sourceId, targetId);
+    res.status(200).json({msg: msg});
+  }
+  catch(error){
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}
+
+exports.oldGroupMessage = async (req, res) => {
+  const {groupId} = req.body;
+  try{
+    msg = await UserService.findGroupMessagesByTargetId(groupId);
     res.status(200).json({msg: msg});
   }
   catch(error){

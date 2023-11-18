@@ -1,11 +1,11 @@
-const express = require('express');
+const express = require("express");
 var http = require("http");
 const app = express();
 const port = 7000;
-const body_parser = require('body-parser');
-const mongoose = require('mongoose');
-const userModel = require('./model/user_model');
-const userRouter = require('./routes/user_route');
+const body_parser = require("body-parser");
+const mongoose = require("mongoose");
+const userModel = require("./model/user_model");
+const userRouter = require("./routes/user_route");
 const cors = require("cors");
 
 var server = http.createServer(app);
@@ -26,31 +26,48 @@ io.on("connection", (socket) => {
   socket.on("signin", (id) => {
     console.log(id, "has joined");
     clients[id] = socket;
-    // console.log(clients[id]);
-    // console.log(clients);
   });
+
+  socket.on("joinGroup", (groupId) => {
+    socket.join(groupId);
+    console.log(socket.id, "has joined group:", groupId);
+  });
+
   socket.on("message", (msg) => {
     console.log(msg);
     let targetId = msg.targetId;
-    console.log(clients[targetId]);
     if (clients[targetId]) {
-      clients[targetId].emit("message", msg);  
+      clients[targetId].emit("message", msg);
     }
+  });
+  socket.on("grpmessage", (msg) => {
+    console.log(msg);
+    let groupId = msg.groupId;
+    
+    if (groupId) {
+      io.to(groupId).emit("grpmessage", msg);
+    }
+  });
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
   });
 });
 
 app.use(body_parser.json());
-app.use('/',userRouter);
+app.use("/", userRouter);
 
-mongoose.connect('mongodb+srv://tanbir:tanbir114@cluster0.bb4slcn.mongodb.net/?retryWrites=true&w=majority')
-.then(client => {
-    server.listen(port, ()=>{
-        console.log(`Server listening on port http://localhost: ${port}`)
+mongoose
+  .connect(
+    "mongodb+srv://tanbir:tanbir114@cluster0.bb4slcn.mongodb.net/?retryWrites=true&w=majority"
+  )
+  .then((client) => {
+    server.listen(port, () => {
+      console.log(`Server listening on port http://localhost: ${port}`);
     });
-    console.log('Connected!');
-})
-.catch(err =>{
-    console.log('Error connecting');
+    console.log("Connected!");
+  })
+  .catch((err) => {
+    console.log("Error connecting");
     console.log(err);
     throw err;
-});
+  });
