@@ -28,5 +28,10 @@ router.post("/oldMessage", UserController.oldMessage);
 router.post("/sentGroupMessage", UserController.sentGroupMessage);
 router.post("/oldGroupMessage", UserController.oldGroupMessage);
 router.post("/addImage", upload.single("img"),UserController.addImage);
+router.post("/addPeopleYouMayKnownProple", UserController.addPeopleYouMayKnownProple);
+router.post("/PeopleYouMayKnown", UserController.PeopleYouMayKnown);
+router.post("/updatePeopleYouMayKnow", UserController.updatePeopleYouMayKnow);
+router.post("/findFriend", UserController.findFriend);
+router.post("/addFriend", UserController.addFriend);
 
 module.exports = router;

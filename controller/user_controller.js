@@ -51,8 +51,7 @@ exports.login = async (req, res, next) => {
       name: user.name,
       email: user.email,
       phone_no: user.phone_no,
-      latitude: user.latitude,
-      longitude: user.longitude,
+      tags: user.tagArray
     });
   } catch (err) {
     console.log(err);
@@ -126,6 +125,7 @@ exports.oldMessage = async (req, res) => {
   const {sourceId, targetId} = req.body;
   try{
     msg = await UserService.findMessagesByTargetId(sourceId, targetId);
+    console.log(msg);
     res.status(200).json({msg: msg});
   }
   catch(error){
@@ -152,6 +152,65 @@ exports.addImage = async (req, res) =>{
   }
   catch(error){
     return res.json({error: error});
+  }
+}
+
+exports.addPeopleYouMayKnownProple = async (req, res) =>{
+  const {sourceId, targetId, userName, friendName} = req.body;
+  try{
+    console.log(sourceId);
+    await UserService.addPeopleYouMayKnownProple(sourceId, targetId, userName, friendName);
+    await UserService.addPeopleYouMayKnownProple(targetId, sourceId, friendName, userName);
+    res.status(200).json({msg:{}});
+  }
+  catch(error){
+    return res.json({error:error});
+  }
+}
+
+exports.updatePeopleYouMayKnow = async (req, res) =>{
+  const {userId, friendId, requestSent} = req.body;
+  try{
+    const mayKnow = await UserService.updatePeopleYouMayKnow(userId,friendId, requestSent);
+    res.status(200).json(mayKnow);
+  }
+  catch(error){
+    return res.json({error:error});
+  }
+}
+
+exports.addFriend = async (req, res) =>{
+  const {userId, friendId, isFriend, isFriendRequestSent, isFriendRequestRecieved} = req.body;
+
+  try{
+    const mayKnow = await UserService.addFriend(userId,friendId, isFriend, isFriendRequestSent, isFriendRequestRecieved);
+    res.status(200).json(mayKnow);
+  }
+  catch(error){
+    return res.json({error:error});
+  }
+}
+
+exports.PeopleYouMayKnown = async (req, res) =>{
+  const {sourceId} = req.body;
+  try{
+    const mayKnow = await UserService.PeopleYouMayKnown(sourceId);
+    res.status(200).json(mayKnow);
+  }
+  catch(error){
+    return res.json({error:error});
+  }
+}
+
+exports.findFriend = async (req, res) => {
+  const {sourceId} = req.body;
+  try{
+    console.log(sourceId);
+    friends = await UserService.getAllUserFriends(sourceId);
+    return res.json({friends:friends});
+  }
+  catch(err){
+    return res.json({error:err});
   }
 }
 

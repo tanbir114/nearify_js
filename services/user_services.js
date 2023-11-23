@@ -1,5 +1,6 @@
 const userModel = require("../model/user_model");
 const groupModel = require("../model/group_model");
+const friendModel = require("../model/friend_model");
 const jwt = require("jsonwebtoken");
 
 class UserService {
@@ -92,7 +93,7 @@ class UserService {
     src_path,
     dest_path
   ) {
-    const result = await userModel.updateOne(
+    var result = await userModel.updateOne(
       { _id: sourceId },
       {
         $push: {
@@ -106,6 +107,7 @@ class UserService {
         },
       }
     );
+
     result = await userModel.updateOne(
       { _id: targetId },
       {
@@ -124,14 +126,30 @@ class UserService {
   }
 
   static async findMessagesByTargetId(sourceId, targetId) {
+    console.log("targetId: ", targetId);
     const user = await userModel.findOne({
       _id: sourceId,
-      "messages.targetId": targetId,
     });
-    return user;
+    if (user) {
+      const filteredMessages = user.messages.filter(
+        (message) => message.targetId === targetId
+      );
+      // console.log("Filtered Messages:", filteredMessages);
+      return filteredMessages;
+    } else {
+      console.log("User not found");
+    }
   }
 
-  static async addGroupMessage(message, userId, senderName, time, groupId, src_path, dest_path) {
+  static async addGroupMessage(
+    message,
+    userId,
+    senderName,
+    time,
+    groupId,
+    src_path,
+    dest_path
+  ) {
     try {
       const createMessage = new groupModel({
         userId: userId,
@@ -142,7 +160,6 @@ class UserService {
         dest_path: dest_path,
         senderName: senderName,
       });
-      console.log(createMessage);
       return await createMessage.save();
     } catch (err) {
       console.error(err);
@@ -157,6 +174,121 @@ class UserService {
     });
     console.log(user);
     return user;
+  }
+
+  static async getAllUserFriends(sourceId) {
+    const friends = await friendModel.find({ userId: sourceId, isFriend: true }, "friendId");
+    if (friends.length > 0) {
+      const friendIds = friends.map((friend) => friend.friendId);
+      const users = await userModel.find({ _id: { $in: friendIds }}, "_id name");
+      return users;
+    } else {
+      console.log("No friends found.");
+    }
+  }
+
+  static async addPeopleYouMayKnownProple(
+    sourceId,
+    targetId,
+    userName,
+    friendName
+  ) {
+    console.log("sourceId: ", sourceId);
+    console.log("targetId: ", targetId);
+    const existingFriend = await friendModel.findOne({
+      userId: sourceId,
+      friendId: targetId,
+    });
+    if (!existingFriend) {
+      try {
+        const newFriend = new friendModel({
+          userId: sourceId,
+          friendId: targetId,
+          friendName: friendName,
+          userName: userName,
+          isFriend: false,
+          isFriendRequestSent: false,
+          isFriendRequestRecieved: false,
+        });
+        await newFriend.save();
+      } catch (error) {
+        console.error("Error saving friend:", error);
+        throw error;
+      }
+    } else {
+      console.log("Friend already exists!");
+    }
+  }
+
+  static async PeopleYouMayKnown(sourceId) {
+    try {
+      console.log(sourceId);
+      const friends = await friendModel.find({
+        userId: sourceId,
+        isFriend: false,
+      });
+      return friends;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  static async updatePeopleYouMayKnow(userId, friendId, requestSent) {
+    try {
+      var friends = await friendModel.updateOne(
+        { userId: userId, friendId: friendId },
+        {
+          $set: {
+            isFriendRequestSent: requestSent,
+          },
+        }
+      );
+      friends = await friendModel.updateOne(
+        { userId: friendId, friendId: userId },
+        {
+          $set: {
+            isFriendRequestRecieved: requestSent,
+          },
+        }
+      );
+      return friends;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  static async addFriend(
+    userId,
+    friendId,
+    isFriend,
+    isFriendRequestSent,
+    isFriendRequestRecieved
+  ) {
+    try {
+      var friends = await friendModel.updateOne(
+        { userId: userId, friendId: friendId },
+        {
+          $set: {
+            isFriend: isFriend,
+            isFriendRequestSent: isFriendRequestSent,
+            isFriendRequestRecieved: isFriendRequestRecieved,
+          },
+        }
+      );
+      friends = await friendModel.updateOne(
+        { userId: friendId, friendId: userId },
+        {
+          $set: {
+            isFriend: isFriend,
+            isFriendRequestSent: isFriendRequestSent,
+            isFriendRequestRecieved: isFriendRequestRecieved,
+          },
+        }
+      );
+      return friends;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 
